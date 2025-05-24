@@ -10,8 +10,9 @@ use alloy_rpc_types::{
         filter::TraceFilter,
         geth::{GethDebugTracingCallOptions, GethDebugTracingOptions},
     },
-    BlockId, BlockNumberOrTag as BlockNumber, BlockOverrides, Filter, Index,
+    BlockId,BlockOverrides, Filter, Index,
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag as BlockNumber;
 use alloy_serde::WithOtherFields;
 use foundry_common::serde_helpers::{
     deserialize_number, deserialize_number_opt, deserialize_number_seq,
@@ -83,7 +84,7 @@ pub enum EthRequest {
 
     #[serde(rename = "eth_getBlockByNumber")]
     EthGetBlockByNumber(
-        #[serde(deserialize_with = "lenient_block_number::lenient_block_number")] BlockNumber,
+        BlockNumber,
         bool,
     ),
 
@@ -94,8 +95,7 @@ pub enum EthRequest {
     EthGetTransactionCountByHash(B256),
 
     #[serde(
-        rename = "eth_getBlockTransactionCountByNumber",
-        deserialize_with = "lenient_block_number::lenient_block_number_seq"
+        rename = "eth_getBlockTransactionCountByNumber"
     )]
     EthGetTransactionCountByNumber(BlockNumber),
 
@@ -103,8 +103,7 @@ pub enum EthRequest {
     EthGetUnclesCountByHash(B256),
 
     #[serde(
-        rename = "eth_getUncleCountByBlockNumber",
-        deserialize_with = "lenient_block_number::lenient_block_number_seq"
+        rename = "eth_getUncleCountByBlockNumber"
     )]
     EthGetUnclesCountByNumber(BlockNumber),
 
@@ -197,7 +196,7 @@ pub enum EthRequest {
 
     #[serde(rename = "eth_getUncleByBlockNumberAndIndex")]
     EthGetUncleByBlockNumberAndIndex(
-        #[serde(deserialize_with = "lenient_block_number::lenient_block_number")] BlockNumber,
+        BlockNumber,
         Index,
     ),
 
@@ -271,8 +270,7 @@ pub enum EthRequest {
 
     /// Trace transaction endpoint for parity's `trace_block`
     #[serde(
-        rename = "trace_block",
-        deserialize_with = "lenient_block_number::lenient_block_number_seq"
+        rename = "trace_block"
     )]
     TraceBlock(BlockNumber),
 
@@ -536,7 +534,7 @@ pub enum EthRequest {
     /// Related upstream issue: <https://github.com/otterscan/otterscan/issues/1081>
     #[serde(rename = "erigon_getHeaderByNumber")]
     ErigonGetHeaderByNumber(
-        #[serde(deserialize_with = "lenient_block_number::lenient_block_number_seq")] BlockNumber,
+         BlockNumber,
     ),
 
     /// Otterscan's `ots_getApiLevel` endpoint
@@ -555,7 +553,7 @@ pub enum EthRequest {
     #[serde(rename = "ots_hasCode")]
     OtsHasCode(
         Address,
-        #[serde(deserialize_with = "lenient_block_number::lenient_block_number", default)]
+        #[serde(default)]
         BlockNumber,
     ),
 
@@ -575,7 +573,7 @@ pub enum EthRequest {
     /// logBloom
     #[serde(rename = "ots_getBlockDetails")]
     OtsGetBlockDetails(
-        #[serde(deserialize_with = "lenient_block_number::lenient_block_number_seq", default)]
+        #[serde(default)]
         BlockNumber,
     ),
 

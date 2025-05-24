@@ -2,7 +2,7 @@
 
 use crate::eth::pool::transactions::PoolTransaction;
 use alloy_primitives::{Bytes, SignatureError};
-use alloy_rpc_types::BlockNumberOrTag;
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use alloy_signer::Error as SignerError;
 use alloy_transport::TransportError;
 use anvil_core::eth::wallet::WalletError;
@@ -190,7 +190,7 @@ pub enum FeeHistoryError {
     #[error("requested block range is out of bounds")]
     InvalidBlockRange,
     #[error("could not find newest block number requested: {0}")]
-    BlockNotFound(BlockNumberOrTag),
+    BlockNotFound(LenientBlockNumberOrTag),
 }
 
 #[derive(Debug)]

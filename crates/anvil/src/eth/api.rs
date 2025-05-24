@@ -63,9 +63,10 @@ use alloy_rpc_types::{
         parity::LocalizedTransactionTrace,
     },
     txpool::{TxpoolContent, TxpoolInspect, TxpoolInspectSummary, TxpoolStatus},
-    AccessList, AccessListResult, BlockId, BlockNumberOrTag as BlockNumber, BlockTransactions,
+    AccessList, AccessListResult, BlockId, BlockTransactions,
     EIP1186AccountProofResponse, FeeHistory, Filter, FilteredParams, Index, Log, Work,
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag as BlockNumber;
 use alloy_serde::WithOtherFields;
 use alloy_transport::TransportErrorKind;
 use anvil_core::{

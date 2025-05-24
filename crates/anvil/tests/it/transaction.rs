@@ -7,9 +7,10 @@ use alloy_primitives::{address, hex, map::B256HashSet, Address, Bytes, FixedByte
 use alloy_provider::{Provider, WsConnect};
 use alloy_rpc_types::{
     state::{AccountOverride, EvmOverrides, StateOverride, StateOverridesBuilder},
-    AccessList, AccessListItem, BlockId, BlockNumberOrTag, BlockOverrides, BlockTransactions,
+    AccessList, AccessListItem, BlockId, BlockOverrides, BlockTransactions,
     TransactionRequest,
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use alloy_serde::WithOtherFields;
 use alloy_sol_types::SolValue;
 use anvil::{spawn, EthereumHardfork, NodeConfig};
@@ -486,7 +487,7 @@ async fn get_blocktimestamp_works() {
     assert!(timestamp > U256::from(1));
 
     let latest_block =
-        api.block_by_number(alloy_rpc_types::BlockNumberOrTag::Latest).await.unwrap().unwrap();
+        api.block_by_number(alloy_rpc_types::LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
 
     let timestamp = contract.getCurrentBlockTimestamp().call().await.unwrap();
     assert_eq!(timestamp.to::<u64>(), latest_block.header.timestamp);
@@ -1284,7 +1285,7 @@ async fn can_mine_multiple_in_block() {
 
     api.anvil_mine(Some(U256::from(1)), Some(U256::ZERO)).await.unwrap();
 
-    let block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
 
     let txs = block.transactions.hashes().collect::<Vec<_>>();
     assert_eq!(txs, vec![first, second]);

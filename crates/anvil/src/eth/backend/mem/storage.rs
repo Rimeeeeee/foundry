@@ -12,7 +12,7 @@ use crate::eth::{
     pool::transactions::PoolTransaction,
 };
 use alloy_consensus::constants::EMPTY_WITHDRAWALS;
-use alloy_eips::eip7685::EMPTY_REQUESTS_HASH;
+use alloy_eips::{eip1898::LenientBlockNumberOrTag, eip7685::EMPTY_REQUESTS_HASH};
 use alloy_primitives::{
     map::{B256HashMap, HashMap},
     Bytes, B256, U256,
@@ -26,7 +26,7 @@ use alloy_rpc_types::{
         otterscan::{InternalOperation, OperationType},
         parity::LocalizedTransactionTrace,
     },
-    BlockId, BlockNumberOrTag, TransactionInfo as RethTransactionInfo,
+    BlockId, TransactionInfo as RethTransactionInfo,
 };
 use anvil_core::eth::{
     block::{Block, PartialHeader},
@@ -381,22 +381,22 @@ impl BlockchainStorage {
 }
 
 impl BlockchainStorage {
-    /// Returns the hash for [BlockNumberOrTag]
-    pub fn hash(&self, number: BlockNumberOrTag) -> Option<B256> {
+    /// Returns the hash for [LenientBlockNumberOrTag]
+    pub fn hash(&self, number: LenientBlockNumberOrTag) -> Option<B256> {
         let slots_in_an_epoch = 32;
         match number {
-            BlockNumberOrTag::Latest => Some(self.best_hash),
-            BlockNumberOrTag::Earliest => Some(self.genesis_hash),
-            BlockNumberOrTag::Pending => None,
-            BlockNumberOrTag::Number(num) => self.hashes.get(&num).copied(),
-            BlockNumberOrTag::Safe => {
+            LenientBlockNumberOrTag::Latest => Some(self.best_hash),
+            LenientBlockNumberOrTag::Earliest => Some(self.genesis_hash),
+            LenientBlockNumberOrTag::Pending => None,
+            LenientBlockNumberOrTag::Number(num) => self.hashes.get(&num).copied(),
+            LenientBlockNumberOrTag::Safe => {
                 if self.best_number > (slots_in_an_epoch) {
                     self.hashes.get(&(self.best_number - (slots_in_an_epoch))).copied()
                 } else {
                     Some(self.genesis_hash) // treat the genesis block as safe "by definition"
                 }
             }
-            BlockNumberOrTag::Finalized => {
+            LenientBlockNumberOrTag::Finalized => {
                 if self.best_number > (slots_in_an_epoch * 2) {
                     self.hashes.get(&(self.best_number - (slots_in_an_epoch * 2))).copied()
                 } else {

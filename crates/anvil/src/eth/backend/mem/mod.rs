@@ -71,10 +71,11 @@ use alloy_rpc_types::{
         },
         parity::LocalizedTransactionTrace,
     },
-    AccessList, Block as AlloyBlock, BlockId, BlockNumberOrTag as BlockNumber, BlockTransactions,
+    AccessList, Block as AlloyBlock, BlockId, BlockTransactions,
     EIP1186AccountProofResponse as AccountProof, EIP1186StorageProof as StorageProof, Filter,
     Header as AlloyHeader, Index, Log, Transaction, TransactionReceipt,
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag as BlockNumber;
 use alloy_serde::{OtherFields, WithOtherFields};
 use alloy_signer::Signature;
 use alloy_signer_local::PrivateKeySigner;

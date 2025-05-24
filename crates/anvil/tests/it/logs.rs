@@ -7,7 +7,8 @@ use crate::{
 use alloy_network::EthereumWallet;
 use alloy_primitives::{map::B256HashSet, B256};
 use alloy_provider::Provider;
-use alloy_rpc_types::{BlockNumberOrTag, Filter};
+use alloy_rpc_types:: Filter;
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use anvil::{spawn, NodeConfig};
 use futures::StreamExt;
 
@@ -37,7 +38,7 @@ async fn get_past_events() {
     let filter = Filter::new()
         .address(simple_storage_address)
         .topic1(B256::from(account.into_word()))
-        .from_block(BlockNumberOrTag::from(0));
+        .from_block(LenientBlockNumberOrTag::from(0));
 
     let logs = provider
         .get_logs(&filter)
@@ -55,7 +56,7 @@ async fn get_past_events() {
     // and we can fetch the events at a block hash
     // let hash = provider.get_block(1).await.unwrap().unwrap().hash.unwrap();
     let hash =
-        provider.get_block_by_number(BlockNumberOrTag::from(1)).await.unwrap().unwrap().header.hash;
+        provider.get_block_by_number(LenientBlockNumberOrTag::from(1)).await.unwrap().unwrap().header.hash;
 
     let filter = Filter::new()
         .address(simple_storage_address)
@@ -90,11 +91,11 @@ async fn get_all_events() {
     api.anvil_set_auto_mine(false).await.unwrap();
 
     let pre_logs =
-        provider.get_logs(&Filter::new().from_block(BlockNumberOrTag::Earliest)).await.unwrap();
+        provider.get_logs(&Filter::new().from_block(LenientBlockNumberOrTag::Earliest)).await.unwrap();
     assert_eq!(pre_logs.len(), 1);
 
     let pre_logs =
-        provider.get_logs(&Filter::new().from_block(BlockNumberOrTag::Number(0))).await.unwrap();
+        provider.get_logs(&Filter::new().from_block(LenientBlockNumberOrTag::Number(0))).await.unwrap();
     assert_eq!(pre_logs.len(), 1);
 
     // spread logs across several blocks
@@ -107,7 +108,7 @@ async fn get_all_events() {
     }
 
     let logs =
-        provider.get_logs(&Filter::new().from_block(BlockNumberOrTag::Earliest)).await.unwrap();
+        provider.get_logs(&Filter::new().from_block(LenientBlockNumberOrTag::Earliest)).await.unwrap();
 
     let num_logs = num_tx + pre_logs.len();
     assert_eq!(logs.len(), num_logs);
@@ -186,7 +187,7 @@ async fn watch_events() {
         assert_eq!(log.1.block_number.unwrap(), starting_block_number + i + 1);
 
         let hash = provider
-            .get_block_by_number(BlockNumberOrTag::from(starting_block_number + i + 1))
+            .get_block_by_number(LenientBlockNumberOrTag::from(starting_block_number + i + 1))
             .await
             .unwrap()
             .unwrap()

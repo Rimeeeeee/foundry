@@ -20,7 +20,8 @@ use alloy_genesis::Genesis;
 use alloy_network::{AnyNetwork, TransactionResponse};
 use alloy_primitives::{hex, map::HashMap, utils::Unit, BlockNumber, TxHash, U256};
 use alloy_provider::Provider;
-use alloy_rpc_types::{Block, BlockNumberOrTag};
+use alloy_rpc_types::Block;
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use alloy_signer::Signer;
 use alloy_signer_local::{
     coins_bip39::{English, Mnemonic},
@@ -1205,7 +1206,7 @@ impl NodeConfig {
         };
 
         let block = provider
-            .get_block(BlockNumberOrTag::Number(fork_block_number).into())
+            .get_block(LenientBlockNumberOrTag::Number(fork_block_number).into())
             .await
             .wrap_err("failed to get fork block")?;
 

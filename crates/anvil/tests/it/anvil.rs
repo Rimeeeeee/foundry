@@ -1,7 +1,7 @@
 //! tests for anvil specific logic
 
 use alloy_consensus::EMPTY_ROOT_HASH;
-use alloy_eips::BlockNumberOrTag;
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use alloy_primitives::Address;
 use alloy_provider::Provider;
 use anvil::{spawn, EthereumHardfork, NodeConfig};
@@ -86,7 +86,7 @@ async fn test_can_handle_large_timestamp() {
     api.evm_set_next_block_timestamp(num).unwrap();
     api.mine_one().await;
 
-    let block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     assert_eq!(block.header.timestamp, num);
 }
 
@@ -96,7 +96,7 @@ async fn test_shanghai_fields() {
         spawn(NodeConfig::test().with_hardfork(Some(EthereumHardfork::Shanghai.into()))).await;
     api.mine_one().await;
 
-    let block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     assert_eq!(block.header.withdrawals_root, Some(EMPTY_ROOT_HASH));
     assert_eq!(block.withdrawals, Some(Default::default()));
     assert!(block.header.blob_gas_used.is_none());
@@ -109,7 +109,7 @@ async fn test_cancun_fields() {
         spawn(NodeConfig::test().with_hardfork(Some(EthereumHardfork::Cancun.into()))).await;
     api.mine_one().await;
 
-    let block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     assert_eq!(block.header.withdrawals_root, Some(EMPTY_ROOT_HASH));
     assert_eq!(block.withdrawals, Some(Default::default()));
     assert!(block.header.blob_gas_used.is_some());

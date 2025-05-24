@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use alloy_rpc_types::BlockNumberOrTag;
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use eyre::bail;
 use op_revm::OpSpecId;
 use revm::primitives::hardfork::SpecId;
@@ -137,11 +137,11 @@ impl From<EthereumHardfork> for SpecId {
     }
 }
 
-impl<T: Into<BlockNumberOrTag>> From<T> for EthereumHardfork {
+impl<T: Into<LenientBlockNumberOrTag>> From<T> for EthereumHardfork {
     fn from(block: T) -> Self {
         let num = match block.into() {
-            BlockNumberOrTag::Earliest => 0,
-            BlockNumberOrTag::Number(num) => num,
+            LenientBlockNumberOrTag::Earliest => 0,
+            LenientBlockNumberOrTag::Number(num) => num,
             _ => u64::MAX,
         };
 

@@ -6,8 +6,9 @@ use alloy_primitives::{address, Address, Bytes, U256};
 use alloy_provider::Provider;
 use alloy_rpc_types::{
     trace::otterscan::{InternalOperation, OperationType, TraceEntry},
-    BlockNumberOrTag, TransactionRequest,
+     TransactionRequest,
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use alloy_serde::WithOtherFields;
 use alloy_sol_types::{sol, SolCall, SolError, SolValue};
 use anvil::{spawn, EthereumHardfork, NodeConfig};
@@ -171,7 +172,7 @@ async fn ots_has_code() {
     let contract_address = sender.create(0);
 
     // no code in the address before deploying
-    assert!(!api.ots_has_code(contract_address, BlockNumberOrTag::Number(1)).await.unwrap());
+    assert!(!api.ots_has_code(contract_address, LenientBlockNumberOrTag::Number(1)).await.unwrap());
 
     let contract_builder = Multicall::deploy_builder(&provider);
     let contract_receipt = contract_builder.send().await.unwrap().get_receipt().await.unwrap();
@@ -180,10 +181,10 @@ async fn ots_has_code() {
     assert_eq!(num, contract_receipt.block_number.unwrap());
 
     // code is detected after deploying
-    assert!(api.ots_has_code(contract_address, BlockNumberOrTag::Number(num)).await.unwrap());
+    assert!(api.ots_has_code(contract_address, LenientBlockNumberOrTag::Number(num)).await.unwrap());
 
     // code is not detected for the previous block
-    assert!(!api.ots_has_code(contract_address, BlockNumberOrTag::Number(num - 1)).await.unwrap());
+    assert!(!api.ots_has_code(contract_address, LenientBlockNumberOrTag::Number(num - 1)).await.unwrap());
 }
 
 #[tokio::test(flavor = "multi_thread")]

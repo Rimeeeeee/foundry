@@ -6,6 +6,7 @@ use crate::{
     utils::http_provider_with_signer,
 };
 use alloy_consensus::{SignableTransaction, TxEip1559};
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use alloy_network::{EthereumWallet, TransactionBuilder, TxSignerSync};
 use alloy_primitives::{address, fixed_bytes, utils::Unit, Address, Bytes, TxKind, U256};
 use alloy_provider::{ext::TxPoolApi, Provider};
@@ -13,7 +14,7 @@ use alloy_rpc_types::{
     anvil::{
         ForkedNetwork, Forking, Metadata, MineOptions, NodeEnvironment, NodeForkConfig, NodeInfo,
     },
-    BlockId, BlockNumberOrTag, TransactionRequest,
+    BlockId, TransactionRequest,
 };
 use alloy_serde::WithOtherFields;
 use anvil::{
@@ -57,7 +58,7 @@ async fn can_set_block_gas_limit() {
     assert!(api.evm_set_block_gas_limit(block_gas_limit).unwrap());
     // Mine a new block, and check the new block gas limit
     api.mine_one().await;
-    let latest_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     assert_eq!(block_gas_limit.to::<u64>(), latest_block.header.gas_limit);
 }
 
@@ -593,16 +594,16 @@ async fn test_fork_revert_next_block_timestamp() {
 
     // Mine a new block, and check the new block gas limit
     api.mine_one().await;
-    let latest_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
 
     let state_snapshot = api.evm_snapshot().await.unwrap();
     api.mine_one().await;
     api.evm_revert(state_snapshot).await.unwrap();
-    let block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     assert_eq!(block, latest_block);
 
     api.mine_one().await;
-    let block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     assert!(block.header.timestamp >= latest_block.header.timestamp);
 }
 
@@ -615,7 +616,7 @@ async fn test_fork_revert_call_latest_block_timestamp() {
 
     // Mine a new block, and check the new block gas limit
     api.mine_one().await;
-    let latest_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
 
     let state_snapshot = api.evm_snapshot().await.unwrap();
     api.mine_one().await;

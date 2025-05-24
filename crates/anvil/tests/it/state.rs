@@ -31,7 +31,7 @@ async fn can_load_state() {
     // Ref: https://github.com/foundry-rs/foundry/issues/9017
     // Check responses of eth_blockNumber and eth_getBlockByNumber don't deviate after loading state
     let num_from_tag = api
-        .block_by_number(alloy_eips::BlockNumberOrTag::Latest)
+        .block_by_number(alloy_eips::eip1898::LenientBlockNumberOrTag::Latest)
         .await
         .unwrap()
         .unwrap()

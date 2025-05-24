@@ -11,9 +11,10 @@ use alloy_primitives::{
 };
 use alloy_provider::Provider;
 use alloy_rpc_types::{
-    request::TransactionRequest, state::AccountOverride, BlockId, BlockNumberOrTag,
+    request::TransactionRequest, state::AccountOverride, BlockId, 
     BlockTransactions,
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use alloy_serde::WithOtherFields;
 use anvil::{eth::api::CLIENT_VERSION, spawn, NodeConfig, CHAIN_ID};
 use futures::join;
@@ -178,7 +179,7 @@ async fn can_estimate_gas_with_undersized_max_fee_per_gas() {
 
     let undersized_max_fee_per_gas = 1;
 
-    let latest_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     let latest_block_base_fee_per_gas = latest_block.header.base_fee_per_gas.unwrap();
 
     assert!(undersized_max_fee_per_gas < latest_block_base_fee_per_gas);
@@ -240,7 +241,7 @@ async fn can_call_on_pending_block() {
 
     // Ensure that the right header values are set when calling a past block
     for anvil_block_number in 1..(api.block_number().unwrap().to::<usize>() + 1) {
-        let block_number = BlockNumberOrTag::Number(anvil_block_number as u64);
+        let block_number = LenientBlockNumberOrTag::Number(anvil_block_number as u64);
         let block = api.block_by_number(block_number).await.unwrap().unwrap();
 
         let ret_timestamp = contract
@@ -284,7 +285,7 @@ async fn can_call_with_undersized_max_fee_per_gas() {
     let simple_storage_contract =
         SimpleStorage::deploy(&provider, init_value.clone()).await.unwrap();
 
-    let latest_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     let latest_block_base_fee_per_gas = latest_block.header.base_fee_per_gas.unwrap();
     let undersized_max_fee_per_gas = 1;
 
@@ -382,10 +383,10 @@ async fn can_mine_while_mining() {
     let total_blocks = 200;
 
     let block_number =
-        api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap().header.number;
+        api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap().header.number;
     assert_eq!(block_number, 0);
 
-    let block = api.block_by_number(BlockNumberOrTag::Number(block_number)).await.unwrap().unwrap();
+    let block = api.block_by_number(LenientBlockNumberOrTag::Number(block_number)).await.unwrap().unwrap();
     assert_eq!(block.header.number, 0);
 
     let result = join!(
@@ -397,9 +398,9 @@ async fn can_mine_while_mining() {
     tokio::time::sleep(Duration::from_millis(100)).await;
 
     let block_number =
-        api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap().header.number;
+        api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap().header.number;
     assert_eq!(block_number, total_blocks);
 
-    let block = api.block_by_number(BlockNumberOrTag::Number(block_number)).await.unwrap().unwrap();
+    let block = api.block_by_number(LenientBlockNumberOrTag::Number(block_number)).await.unwrap().unwrap();
     assert_eq!(block.header.number, total_blocks);
 }

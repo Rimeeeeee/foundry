@@ -4,7 +4,8 @@ use alloy_ens::NameOrAddress;
 use alloy_json_abi::Event;
 use alloy_network::AnyNetwork;
 use alloy_primitives::{hex::FromHex, Address, B256};
-use alloy_rpc_types::{BlockId, BlockNumberOrTag, Filter, FilterBlockOption, FilterSet, Topic};
+use alloy_rpc_types::{BlockId, Filter, FilterBlockOption, FilterSet, Topic};
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use clap::Parser;
 use eyre::Result;
 use foundry_cli::{opts::EthereumOpts, utils, utils::LoadConfig};
@@ -99,8 +100,8 @@ impl LogsArgs {
 /// successful, `topics_or_args` is parsed as indexed inputs and converted to topics. Otherwise,
 /// `sig_or_topic` is prepended to `topics_or_args` and used as raw topics.
 fn build_filter(
-    from_block: Option<BlockNumberOrTag>,
-    to_block: Option<BlockNumberOrTag>,
+    from_block: Option<LenientBlockNumberOrTag>,
+    to_block: Option<LenientBlockNumberOrTag>,
     address: Option<Address>,
     sig_or_topic: Option<String>,
     topics_or_args: Vec<String>,
@@ -215,8 +216,8 @@ mod tests {
 
     #[test]
     fn test_build_filter_basic() {
-        let from_block = Some(BlockNumberOrTag::from(1337));
-        let to_block = Some(BlockNumberOrTag::Latest);
+        let from_block = Some(LenientBlockNumberOrTag::from(1337));
+        let to_block = Some(LenientBlockNumberOrTag::Latest);
         let address = Address::from_str(ADDRESS).ok();
         let expected = Filter {
             block_option: FilterBlockOption::Range { from_block, to_block },

@@ -18,8 +18,9 @@ use alloy_provider::{
 };
 use alloy_rlp::Decodable;
 use alloy_rpc_types::{
-    state::StateOverride, BlockId, BlockNumberOrTag, Filter, TransactionRequest,
+    state::StateOverride, BlockId,Filter, TransactionRequest,
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use alloy_serde::WithOtherFields;
 use alloy_sol_types::sol;
 use base::{Base, NumberWithBase, ToBase};
@@ -958,7 +959,8 @@ impl<P: Provider<AnyNetwork>> Cast<P> {
     /// ```
     /// use alloy_primitives::fixed_bytes;
     /// use alloy_provider::{network::AnyNetwork, ProviderBuilder, RootProvider};
-    /// use alloy_rpc_types::{BlockId, BlockNumberOrTag};
+    /// use alloy_rpc_types::BlockId;
+    /// use alloy_eips::eip1898::LenientBlockNumberOrTag;
     /// use cast::Cast;
     /// use std::{convert::TryFrom, str::FromStr};
     ///
@@ -968,14 +970,14 @@ impl<P: Provider<AnyNetwork>> Cast<P> {
     /// let cast = Cast::new(provider);
     ///
     /// let block_number = cast.convert_block_number(Some(BlockId::number(5))).await?;
-    /// assert_eq!(block_number, Some(BlockNumberOrTag::Number(5)));
+    /// assert_eq!(block_number, Some(LenientBlockNumberOrTag::Number(5)));
     ///
     /// let block_number = cast
     ///     .convert_block_number(Some(BlockId::hash(fixed_bytes!(
     ///         "0000000000000000000000000000000000000000000000000000000000001234"
     ///     ))))
     ///     .await?;
-    /// assert_eq!(block_number, Some(BlockNumberOrTag::Number(4660)));
+    /// assert_eq!(block_number, Some(LenientBlockNumberOrTag::Number(4660)));
     ///
     /// let block_number = cast.convert_block_number(None).await?;
     /// assert_eq!(block_number, None);
@@ -985,13 +987,13 @@ impl<P: Provider<AnyNetwork>> Cast<P> {
     pub async fn convert_block_number(
         &self,
         block: Option<BlockId>,
-    ) -> Result<Option<BlockNumberOrTag>, eyre::Error> {
+    ) -> Result<Option<LenientBlockNumberOrTag>, eyre::Error> {
         match block {
             Some(block) => match block {
                 BlockId::Number(block_number) => Ok(Some(block_number)),
                 BlockId::Hash(hash) => {
                     let block = self.provider.get_block_by_hash(hash.block_hash).await?;
-                    Ok(block.map(|block| block.header.number).map(BlockNumberOrTag::from))
+                    Ok(block.map(|block| block.header.number).map(LenientBlockNumberOrTag::from))
                 }
             },
             None => Ok(None),

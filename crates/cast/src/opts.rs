@@ -1091,7 +1091,8 @@ pub fn parse_slot(s: &str) -> Result<B256> {
 mod tests {
     use super::*;
     use crate::SimpleCast;
-    use alloy_rpc_types::{BlockNumberOrTag, RpcBlockHash};
+    use alloy_rpc_types:: RpcBlockHash;
+    use alloy_eips::eip1898::LenientBlockNumberOrTag;
     use clap::CommandFactory;
 
     #[test]
@@ -1194,7 +1195,7 @@ mod tests {
         let test_cases = [
             TestCase {
                 input: "0".to_string(),
-                expect: BlockId::Number(BlockNumberOrTag::Number(0u64)),
+                expect: BlockId::Number(LenientBlockNumberOrTag::Number(0u64)),
             },
             TestCase {
                 input: "0x56462c47c03df160f66819f0a79ea07def1569f8aac0fe91bb3a081159b61b4a"
@@ -1208,20 +1209,20 @@ mod tests {
             },
             TestCase {
                 input: "latest".to_string(),
-                expect: BlockId::Number(BlockNumberOrTag::Latest),
+                expect: BlockId::Number(LenientBlockNumberOrTag::Latest),
             },
             TestCase {
                 input: "earliest".to_string(),
-                expect: BlockId::Number(BlockNumberOrTag::Earliest),
+                expect: BlockId::Number(LenientBlockNumberOrTag::Earliest),
             },
             TestCase {
                 input: "pending".to_string(),
-                expect: BlockId::Number(BlockNumberOrTag::Pending),
+                expect: BlockId::Number(LenientBlockNumberOrTag::Pending),
             },
-            TestCase { input: "safe".to_string(), expect: BlockId::Number(BlockNumberOrTag::Safe) },
+            TestCase { input: "safe".to_string(), expect: BlockId::Number(LenientBlockNumberOrTag::Safe) },
             TestCase {
                 input: "finalized".to_string(),
-                expect: BlockId::Number(BlockNumberOrTag::Finalized),
+                expect: BlockId::Number(LenientBlockNumberOrTag::Finalized),
             },
         ];
 

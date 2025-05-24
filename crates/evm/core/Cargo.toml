@@ -21,6 +21,7 @@ foundry-evm-abi.workspace = true
 
 alloy-dyn-abi = { workspace = true, features = ["arbitrary", "eip712"] }
 alloy-evm.workspace = true
+alloy-eips.workspace = true
 alloy-genesis.workspace = true
 alloy-json-abi.workspace = true
 alloy-primitives = { workspace = true, features = [

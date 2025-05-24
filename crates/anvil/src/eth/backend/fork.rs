@@ -19,9 +19,10 @@ use alloy_rpc_types::{
         geth::{GethDebugTracingOptions, GethTrace},
         parity::LocalizedTransactionTrace as Trace,
     },
-    BlockId, BlockNumberOrTag as BlockNumber, BlockTransactions, EIP1186AccountProofResponse,
+    BlockId, BlockTransactions, EIP1186AccountProofResponse,
     FeeHistory, Filter, Log,
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag as BlockNumber;
 use alloy_serde::WithOtherFields;
 use alloy_transport::TransportError;
 use anvil_core::eth::transaction::{convert_to_anvil_receipt, ReceiptResponse};

@@ -4,7 +4,8 @@ use alloy_chains::NamedChain;
 use alloy_network::{TransactionBuilder, TransactionResponse};
 use alloy_primitives::{address, b256, Bytes, B256};
 use alloy_provider::{Provider, ProviderBuilder};
-use alloy_rpc_types::{BlockNumberOrTag, Index, TransactionRequest};
+use alloy_rpc_types::{ Index, TransactionRequest};
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use anvil::{EthereumHardfork, NodeConfig};
 use foundry_test_utils::{
     rpc::{
@@ -2098,7 +2099,7 @@ contract LocalProjectScript is Script {
     cmd.assert_success();
 
     let tx_hash = api
-        .transaction_by_block_number_and_index(BlockNumberOrTag::Latest, Index::from(0))
+        .transaction_by_block_number_and_index(LenientBlockNumberOrTag::Latest, Index::from(0))
         .await
         .unwrap()
         .unwrap()
@@ -2188,7 +2189,7 @@ forgetest_async!(show_state_changes_in_traces, |prj, cmd| {
         .assert_success();
 
     let tx_hash = api
-        .transaction_by_block_number_and_index(BlockNumberOrTag::Latest, Index::from(0))
+        .transaction_by_block_number_and_index(LenientBlockNumberOrTag::Latest, Index::from(0))
         .await
         .unwrap()
         .unwrap()
@@ -2280,7 +2281,7 @@ contract CounterInExternalLibScript is Script {
     .assert_success();
 
     let tx_hash = api
-        .transaction_by_block_number_and_index(BlockNumberOrTag::Latest, Index::from(0))
+        .transaction_by_block_number_and_index(LenientBlockNumberOrTag::Latest, Index::from(0))
         .await
         .unwrap()
         .unwrap()

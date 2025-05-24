@@ -12,8 +12,9 @@ use alloy_rpc_types::{
     anvil::Forking,
     request::{TransactionInput, TransactionRequest},
     state::EvmOverrides,
-    BlockId, BlockNumberOrTag,
+    BlockId
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use alloy_serde::WithOtherFields;
 use alloy_signer_local::PrivateKeySigner;
 use anvil::{eth::EthApi, spawn, NodeConfig, NodeHandle};
@@ -168,7 +169,7 @@ async fn test_fork_eth_get_code() {
     ];
     for address in addresses {
         let prev_code = api
-            .get_code(address, Some(BlockNumberOrTag::Number(BLOCK_NUMBER - 10).into()))
+            .get_code(address, Some(LenientBlockNumberOrTag::Number(BLOCK_NUMBER - 10).into()))
             .await
             .unwrap();
         let code = api.get_code(address, None).await.unwrap();
@@ -224,9 +225,9 @@ async fn test_fork_eth_fee_history() {
 
     let count = 10u64;
     let _history =
-        api.fee_history(U256::from(count), BlockNumberOrTag::Latest, vec![]).await.unwrap();
+        api.fee_history(U256::from(count), LenientBlockNumberOrTag::Latest, vec![]).await.unwrap();
     let _provider_history =
-        provider.get_fee_history(count, BlockNumberOrTag::Latest, &[]).await.unwrap();
+        provider.get_fee_history(count, LenientBlockNumberOrTag::Latest, &[]).await.unwrap();
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -883,9 +884,9 @@ async fn test_fork_call() {
 async fn test_fork_block_timestamp() {
     let (api, _) = spawn(fork_config()).await;
 
-    let initial_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let initial_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     api.anvil_mine(Some(U256::from(1)), None).await.unwrap();
-    let latest_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
 
     assert!(initial_block.header.timestamp <= latest_block.header.timestamp);
 }
@@ -896,11 +897,11 @@ async fn test_fork_snapshot_block_timestamp() {
 
     let snapshot_id = api.evm_snapshot().await.unwrap();
     api.anvil_mine(Some(U256::from(1)), None).await.unwrap();
-    let initial_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let initial_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     api.evm_revert(snapshot_id).await.unwrap();
     api.evm_set_next_block_timestamp(initial_block.header.timestamp).unwrap();
     api.anvil_mine(Some(U256::from(1)), None).await.unwrap();
-    let latest_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
 
     assert_eq!(initial_block.header.timestamp, latest_block.header.timestamp);
 }
@@ -914,7 +915,7 @@ async fn test_fork_uncles_fetch() {
     let block_with_uncles = 190u64;
 
     let block =
-        api.block_by_number(BlockNumberOrTag::Number(block_with_uncles)).await.unwrap().unwrap();
+        api.block_by_number(LenientBlockNumberOrTag::Number(block_with_uncles)).await.unwrap().unwrap();
 
     assert_eq!(block.uncles.len(), 2);
 
@@ -963,26 +964,26 @@ async fn test_fork_block_transaction_count() {
     let _ = provider.send_transaction(tx).await.unwrap();
 
     let pending_txs =
-        api.block_transaction_count_by_number(BlockNumberOrTag::Pending).await.unwrap().unwrap();
+        api.block_transaction_count_by_number(LenientBlockNumberOrTag::Pending).await.unwrap().unwrap();
     assert_eq!(pending_txs.to::<u64>(), 1);
 
     // mine a new block
     api.anvil_mine(None, None).await.unwrap();
 
     let pending_txs =
-        api.block_transaction_count_by_number(BlockNumberOrTag::Pending).await.unwrap().unwrap();
+        api.block_transaction_count_by_number(LenientBlockNumberOrTag::Pending).await.unwrap().unwrap();
     assert_eq!(pending_txs.to::<u64>(), 0);
     let latest_txs =
-        api.block_transaction_count_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+        api.block_transaction_count_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     assert_eq!(latest_txs.to::<u64>(), 1);
-    let latest_block = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest_block = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     let latest_txs =
         api.block_transaction_count_by_hash(latest_block.header.hash).await.unwrap().unwrap();
     assert_eq!(latest_txs.to::<u64>(), 1);
 
     // check txs count on an older block: 420000 has 3 txs on mainnet
     let count_txs = api
-        .block_transaction_count_by_number(BlockNumberOrTag::Number(420000))
+        .block_transaction_count_by_number(LenientBlockNumberOrTag::Number(420000))
         .await
         .unwrap()
         .unwrap();
@@ -1084,12 +1085,12 @@ async fn test_block_receipts() {
     let (api, _) = spawn(fork_config()).await;
 
     // Receipts from the forked block (14608400)
-    let receipts = api.block_receipts(BlockNumberOrTag::Number(BLOCK_NUMBER).into()).await.unwrap();
+    let receipts = api.block_receipts(LenientBlockNumberOrTag::Number(BLOCK_NUMBER).into()).await.unwrap();
     assert!(receipts.is_some());
 
     // Receipts from a block in the future (14608401)
     let receipts =
-        api.block_receipts(BlockNumberOrTag::Number(BLOCK_NUMBER + 1).into()).await.unwrap();
+        api.block_receipts(LenientBlockNumberOrTag::Number(BLOCK_NUMBER + 1).into()).await.unwrap();
     assert!(receipts.is_none());
 
     // Receipts from a block hash (14608400)
@@ -1173,7 +1174,7 @@ async fn test_fork_reset_basefee() {
     let (api, _handle) = spawn(fork_config().with_fork_block_number(Some(18835000u64))).await;
 
     api.mine_one().await;
-    let latest = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
 
     // basefee of +1 block: <https://etherscan.io/block/18835001>
     assert_eq!(latest.header.base_fee_per_gas.unwrap(), 59455969592u64);
@@ -1184,7 +1185,7 @@ async fn test_fork_reset_basefee() {
         .unwrap();
 
     api.mine_one().await;
-    let latest = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let latest = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
 
     // basefee of the forked block: <https://etherscan.io/block/18835000>
     assert_eq!(latest.header.base_fee_per_gas.unwrap(), 59017001138);
@@ -1262,7 +1263,7 @@ async fn test_arbitrum_fork_block_number() {
     assert_eq!(block_number, initial_block_number + 1);
 
     // test block by number API call returns proper block number and `l1BlockNumber` is set
-    let block_by_number = api.block_by_number(BlockNumberOrTag::Latest).await.unwrap().unwrap();
+    let block_by_number = api.block_by_number(LenientBlockNumberOrTag::Latest).await.unwrap().unwrap();
     assert_eq!(block_by_number.header.number, initial_block_number + 1);
     assert!(block_by_number.other.get("l1BlockNumber").is_some());
 
@@ -1294,7 +1295,7 @@ async fn test_base_fork_gas_limit() {
 
     let provider = handle.http_provider();
     let block =
-        provider.get_block(BlockId::Number(BlockNumberOrTag::Latest)).await.unwrap().unwrap();
+        provider.get_block(BlockId::Number(LenientBlockNumberOrTag::Latest)).await.unwrap().unwrap();
 
     assert!(api.gas_limit() >= uint!(96_000_000_U256));
     assert!(block.header.gas_limit >= 96_000_000_u64);
@@ -1355,13 +1356,13 @@ async fn test_immutable_fork_transaction_hash() {
     }
 
     let block = api
-        .block_by_number(BlockNumberOrTag::Number(fork_block_number - 1))
+        .block_by_number(LenientBlockNumberOrTag::Number(fork_block_number - 1))
         .await
         .unwrap()
         .unwrap();
     assert_eq!(block.transactions.len(), 6);
     let block = api
-        .block_by_number_full(BlockNumberOrTag::Number(fork_block_number))
+        .block_by_number_full(LenientBlockNumberOrTag::Number(fork_block_number))
         .await
         .unwrap()
         .unwrap();
@@ -1392,7 +1393,7 @@ async fn test_immutable_fork_transaction_hash() {
     ] {
         let tx = api
             .backend
-            .mined_block_by_number(BlockNumberOrTag::Number(fork_block_number))
+            .mined_block_by_number(LenientBlockNumberOrTag::Number(fork_block_number))
             .map(|b| b.header.hash)
             .and_then(|hash| {
                 api.backend.mined_transaction_by_block_hash_and_index(hash, expected.1.into())

@@ -20,8 +20,9 @@ use alloy_rpc_types::{
             RewardAction, TraceOutput,
         },
     },
-    Block, BlockId, BlockNumberOrTag as BlockNumber, BlockTransactions,
+    Block, BlockId, BlockTransactions,
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag as BlockNumber;
 use itertools::Itertools;
 
 use futures::future::join_all;

@@ -7,8 +7,9 @@ use alloy_ens::NameOrAddress;
 use alloy_primitives::{Address, Bytes, TxKind, U256};
 use alloy_rpc_types::{
     state::{StateOverride, StateOverridesBuilder},
-    BlockId, BlockNumberOrTag,
+    BlockId
 };
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use clap::Parser;
 use eyre::Result;
 use foundry_cli::{
@@ -234,7 +235,7 @@ impl CallArgs {
             .await?;
 
         if trace {
-            if let Some(BlockId::Number(BlockNumberOrTag::Number(block_number))) = self.block {
+            if let Some(BlockId::Number(LenientBlockNumberOrTag::Number(block_number))) = self.block {
                 // Override Config `fork_block_number` (if set) with CLI value.
                 config.fork_block_number = Some(block_number);
             }

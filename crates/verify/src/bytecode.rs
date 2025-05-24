@@ -12,7 +12,8 @@ use alloy_provider::{
     network::{AnyTxEnvelope, TransactionBuilder},
     Provider,
 };
-use alloy_rpc_types::{BlockId, BlockNumberOrTag, TransactionInput, TransactionRequest};
+use alloy_rpc_types::{BlockId, TransactionInput, TransactionRequest};
+use alloy_eips::eip1898::LenientBlockNumberOrTag;
 use clap::{Parser, ValueHint};
 use eyre::{Context, OptionExt, Result};
 use foundry_cli::{
@@ -419,7 +420,7 @@ impl VerifyBytecodeArgs {
         if !self.ignore.is_some_and(|b| b.is_runtime()) {
             // Get contract creation block.
             let simulation_block = match self.block {
-                Some(BlockId::Number(BlockNumberOrTag::Number(block))) => block,
+                Some(BlockId::Number(LenientBlockNumberOrTag::Number(block))) => block,
                 Some(_) => eyre::bail!("Invalid block number"),
                 None => {
                     let provider = utils::get_provider(&config)?;

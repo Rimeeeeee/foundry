@@ -9,11 +9,13 @@ use crate::{
     AsEnvMut, Env, EnvMut, InspectorExt,
 };
 use alloy_consensus::Typed2718;
+use alloy_rpc_types::BlockNumberOrTag;
 use alloy_evm::Evm;
 use alloy_genesis::GenesisAccount;
 use alloy_network::{AnyRpcBlock, AnyTxEnvelope, TransactionResponse};
 use alloy_primitives::{keccak256, uint, Address, TxKind, B256, U256};
-use alloy_rpc_types::{BlockNumberOrTag, Transaction, TransactionRequest};
+use alloy_rpc_types::{ Transaction, TransactionRequest};
+use alloy_eips::{eip1898::LenientBlockNumberOrTag, BlockId};
 use eyre::Context;
 use foundry_common::{is_known_system_sender, SYSTEM_TRANSACTION_TYPE};
 pub use foundry_fork_db::{cache::BlockchainDbMeta, BlockchainDb, SharedBackend};
@@ -856,7 +858,7 @@ impl Backend {
             let fork_block = tx_block - 1;
             Ok((fork_block, block))
         } else {
-            let block = fork.db.db.get_full_block(BlockNumberOrTag::Latest)?;
+            let block = fork.db.db.get_full_block(BlockId::Number(LenientBlockNumberOrTag::into_inner(LenientBlockNumberOrTag::new(BlockNumberOrTag::Latest))))?;
 
             let number = block.header.number;
 
